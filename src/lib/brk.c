@@ -2,8 +2,8 @@
 
 extern char *brksize;
 
-PUBLIC char *brk(addr)
-char *addr;
+PUBLIC char *
+brk (char *addr)
 {
   int k;
 
@@ -17,8 +17,8 @@ char *addr;
 }
 
 
-PUBLIC char *sbrk(incr)
-char *incr;
+PUBLIC char *
+sbrk (char *incr)
 {
   char *newsize, *oldsize;
   extern int endv, dorgv;

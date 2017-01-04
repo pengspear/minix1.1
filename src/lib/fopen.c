@@ -3,8 +3,8 @@
 #define  PMODE    0644
 
 
-FILE *fopen(name,mode)
-char *name , *mode;
+FILE *
+fopen (char *name, char *mode)
 {
 	register int i;
 	FILE *fp;

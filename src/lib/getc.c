@@ -2,8 +2,8 @@
 
 
 
-getc(iop)
-FILE *iop;
+int 
+getc (FILE *iop)
 {
 	int ch;
 

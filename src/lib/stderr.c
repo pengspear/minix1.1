@@ -1,5 +1,5 @@
-std_err(s)
-char *s;
+void
+std_err (char *s)
 {
   char *p = s;
 

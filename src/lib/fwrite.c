@@ -1,12 +1,10 @@
 #include "../include/stdio.h"
 
-fwrite(ptr, size, count, file)
-unsigned size, count;
-char *ptr;
-FILE *file;
+unsigned int 
+fwrite (char *ptr, unsigned int size, unsigned int count, FILE *file)
 {
-	unsigned s;
-	unsigned ndone = 0;
+	unsigned int s;
+	unsigned int ndone = 0;
 
 	if (size)
 		while ( ndone < count ) {

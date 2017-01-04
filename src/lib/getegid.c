@@ -1,6 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC gid getegid()
+PUBLIC gid 
+getegid (void)
 {
   int k;
   k = callm1(MM, GETGID, 0, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);

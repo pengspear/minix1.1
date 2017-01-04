@@ -1,5 +1,5 @@
-char *strcat(s1, s2)
-register char *s1, *s2;
+char *
+strcat (register char *s1, register char *s2)
 {
   /* Append s2 to the end of s1. */
 

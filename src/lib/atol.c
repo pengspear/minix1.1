@@ -1,7 +1,7 @@
 #include "../include/ctype.h"
 
-long atol(s)
-register char *s;
+long 
+atol (register char *s)
 {
   register long total = 0;
   register unsigned digit;

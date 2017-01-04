@@ -1,8 +1,7 @@
 #include "../include/stdio.h"
 
-char *sprintf(buf,format,args)
-char *buf, *format;
-int args;
+char *
+sprintf (char *buf, char *format, int args)
 {
 	FILE _tempfile;
 

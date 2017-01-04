@@ -6,14 +6,15 @@
  */
 
 
+static void put(char);
+
 #define TRUNC_SIZE 128
 char Buf[TRUNC_SIZE], *Bufp;
 
 #define OUT 1
 
-prints(s, arglist)
-register char *s;
-int *arglist;
+int 
+prints (register char *s, int *arglist)
 {
   register w;
   int k, r, *valp;
@@ -49,8 +50,8 @@ int *arglist;
   write(OUT, Buf, Bufp - Buf);	/* write everything in one blow. */
 }
 
-static put(c)
-char c;
+static void
+put (char c)
 {
 if (Bufp < &Buf[TRUNC_SIZE]) *Bufp++ = c;
 }

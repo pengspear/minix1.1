@@ -15,9 +15,11 @@ extern message M;
 			Messages to systask (special calls)
 ----------------------------------------------------------------------------*/
 
-PUBLIC sys_xit(parent, proc)
-int parent;			/* parent of exiting proc. */
-int proc;			/* which proc has exited */
+PUBLIC void
+sys_xit (
+    int parent,			/* parent of exiting proc. */
+    int proc			/* which proc has exited */
+)
 {
 /* A proc has exited.  Tell the kernel. */
 
@@ -25,9 +27,11 @@ int proc;			/* which proc has exited */
 }
 
 
-PUBLIC sys_getsp(proc, newsp)
-int proc;			/* which proc has enabled signals */
-vir_bytes *newsp;		/* place to put sp read from kernel */
+PUBLIC void
+sys_getsp (
+    int proc,			/* which proc has enabled signals */
+    vir_bytes *newsp		/* place to put sp read from kernel */
+)
 {
 /* Ask the kernel what the sp is. */
 
@@ -37,10 +41,12 @@ vir_bytes *newsp;		/* place to put sp read from kernel */
 }
 
 
-PUBLIC sys_sig(proc, sig, sighandler)
-int proc;			/* which proc has exited */
-int sig;			/* signal number: 1 - 16 */
-int (*sighandler)();		/* pointer to signal handler in user space */
+PUBLIC void
+sys_sig (
+    int proc,			/* which proc has exited */
+    int sig,			/* signal number: 1 - 16 */
+    int (*sighandler)(void)		/* pointer to signal handler in user space */
+)
 {
 /* A proc has to be signaled.  Tell the kernel. */
 
@@ -51,10 +57,12 @@ int (*sighandler)();		/* pointer to signal handler in user space */
 }
 
 
-PUBLIC sys_fork(parent, child, pid)
-int parent;			/* proc doing the fork */
-int child;			/* which proc has been created by the fork */
-int pid;			/* process id assigned by MM */
+PUBLIC void
+sys_fork (
+    int parent,			/* proc doing the fork */
+    int child,			/* which proc has been created by the fork */
+    int pid			/* process id assigned by MM */
+)
 {
 /* A proc has forked.  Tell the kernel. */
 
@@ -62,18 +70,22 @@ int pid;			/* process id assigned by MM */
 }
 
 
-PUBLIC sys_exec(proc, ptr)
-int proc;			/* proc that did exec */
-char *ptr;			/* new stack pointer */
+PUBLIC void
+sys_exec (
+    int proc,			/* proc that did exec */
+    char *ptr			/* new stack pointer */
+)
 {
 /* A proc has exec'd.  Tell the kernel. */
 
   callm1(SYSTASK, SYS_EXEC, proc, 0, 0, ptr, NIL_PTR, NIL_PTR);
 }
 
-PUBLIC sys_newmap(proc, ptr)
-int proc;			/* proc whose map is to be changed */
-char *ptr;			/* pointer to new map */
+PUBLIC void
+sys_newmap (
+    int proc,			/* proc whose map is to be changed */
+    char *ptr			/* pointer to new map */
+)
 {
 /* A proc has been assigned a new memory map.  Tell the kernel. */
 
@@ -81,8 +93,10 @@ char *ptr;			/* pointer to new map */
   callm1(SYSTASK, SYS_NEWMAP, proc, 0, 0, ptr, NIL_PTR, NIL_PTR);
 }
 
-PUBLIC sys_copy(mptr)
-message *mptr;			/* pointer to message */
+PUBLIC void
+sys_copy (
+    message *mptr			/* pointer to message */
+)
 {
 /* A proc wants to use local copy. */
 
@@ -91,9 +105,11 @@ message *mptr;			/* pointer to message */
   if (sendrec(SYSTASK, mptr) != OK) panic("sys_copy can't send", NO_NUM);
 }
 
-PUBLIC sys_times(proc, ptr)
-int proc;			/* proc whose times are needed */
-real_time ptr[4];			/* pointer to time buffer */
+PUBLIC void
+sys_times (
+    int proc,			/* proc whose times are needed */
+    real_time ptr[4]			/* pointer to time buffer */
+)
 {
 /* Fetch the accounting info for a proc. */
 
@@ -108,7 +124,8 @@ real_time ptr[4];			/* pointer to time buffer */
 
 
 
-PUBLIC sys_abort()
+PUBLIC void
+sys_abort (void)
 {
 /* Something awful has happened.  Abandon ship. */
 
@@ -116,8 +133,8 @@ PUBLIC sys_abort()
 }
 
 
-PUBLIC int tell_fs(what, p1, p2, p3)
-int what, p1, p2, p3;
+PUBLIC int 
+tell_fs (int what, int p1, int p2, int p3)
 {
 /* This routine is only used by MM to inform FS of certain events:
  *      tell_fs(CHDIR, slot, dir, 0)

@@ -1,6 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC brk2()
+PUBLIC void
+brk2 (void)
 {
   char *p1, *p2;
 

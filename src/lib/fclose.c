@@ -1,7 +1,7 @@
 #include "../include/stdio.h"
 
-fclose(fp)
-FILE *fp;
+int 
+fclose (FILE *fp)
 {
 	register int i;
 

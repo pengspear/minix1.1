@@ -1,9 +1,8 @@
 #include "../include/stdio.h"
 
 
-putc(ch, iop)
-char ch;
-FILE *iop;
+int 
+putc (char ch, FILE *iop)
 {
 	int n,
 	didwrite = 0;

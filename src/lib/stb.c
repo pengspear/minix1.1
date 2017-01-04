@@ -1,7 +1,7 @@
     /* library routine for copying structs with unpleasant alignment */
 
-    __stb(n, f, t)
-	    register char *f, *t; register int n;
+int 
+__stb (register int n, register char *f, register char *t)
     {
 	    if (n > 0)
 		    do

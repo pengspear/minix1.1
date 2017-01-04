@@ -2,8 +2,8 @@
 
 static char pwdbuf[9];
 
-char * getpass(prompt)
-char *prompt;
+char *
+getpass (char *prompt)
 {
 	int i = 0;
 	struct sgttyb tty;

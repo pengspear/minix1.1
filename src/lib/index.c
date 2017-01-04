@@ -1,5 +1,5 @@
-char *index(s, c)
-register char *s, c;
+char *
+index (register char *s, register char c)
 {
   do {
 	if (*s == c)

@@ -1,6 +1,5 @@
-char *strncat(s1, s2, n)
-register char *s1, *s2;
-int n;
+char *
+strncat (register char *s1, register char *s2, int n)
 {
 /* Append s2 to the end of s1, but no more than n characters */
 

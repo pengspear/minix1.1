@@ -1,7 +1,7 @@
 /* mktemp - make a name for a temporary file */
 
-char *mktemp(template)
-char *template;
+char *
+mktemp (char *template)
 {
   int pid, k;
   char *p;

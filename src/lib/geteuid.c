@@ -1,6 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC uid geteuid()
+PUBLIC uid 
+geteuid (void)
 {
   int k;
   k = callm1(MM, GETUID, 0, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);

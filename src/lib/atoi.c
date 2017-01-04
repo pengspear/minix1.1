@@ -19,8 +19,8 @@ static _c_;		/* used to store the evaluated parameter */
 #define isspace(c)	(_isblank(c) || _c_=='\r' || _c_=='\n' || _c_=='\f')
 #define iscntrl(c)	((_c_ = (c)) == 0177 || _c_ < ' ')
 
-atoi(s)
-register char *s;
+int 
+atoi (register char *s)
 {
   register int total = 0;
   register unsigned digit;

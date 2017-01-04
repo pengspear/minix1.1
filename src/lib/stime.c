@@ -1,7 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC int stime(top)
-long *top;
+PUBLIC int 
+stime (long *top)
 {
   M.m2_l1 = *top;
   return callx(FS, STIME);
