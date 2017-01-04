@@ -1,8 +1,8 @@
 #include "../include/stdio.h"
 
 
-long ftell(iop)
-FILE *iop;
+long 
+ftell (FILE *iop)
 {
 	long result;
 	long lseek();

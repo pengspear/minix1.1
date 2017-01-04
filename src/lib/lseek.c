@@ -1,9 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC long lseek(fd, offset, whence)
-int fd;
-long offset;
-int whence;
+PUBLIC long 
+lseek (int fd, long offset, int whence)
 {
   int k; 
   M.m2_i1 = fd;

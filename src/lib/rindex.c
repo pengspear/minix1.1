@@ -1,5 +1,5 @@
-char *rindex(s, c)
-register char *s, c;
+char *
+rindex (register char *s, register char c)
 {
   register char *result;
 

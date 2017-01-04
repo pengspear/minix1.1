@@ -1,6 +1,6 @@
 #define NULL  (char *) 0
-char *getenv(name)
-register char *name;
+char *
+getenv (register char *name)
 {
   extern char **environ;
   register char **v = environ, *p, *q;

@@ -1,7 +1,7 @@
 #include "../include/stat.h"
 
-int isatty(fd)
-int fd;
+int 
+isatty (int fd)
 {
   struct stat s;
 

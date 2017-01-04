@@ -12,9 +12,11 @@ int (*vectab[NR_SIGS])();	/* array of functions to catch signals */
  * and change ../h/signal.h accordingly.
  */
 
-PUBLIC int (*signal(signr, func))()
-int signr;			/* which signal is being set */
-int (*func)();			/* pointer to function that catches signal */
+PUBLIC int (*
+signal (
+    int signr,			/* which signal is being set */
+    int (*func)(void)			/* pointer to function that catches signal */
+))(void)
 {
   int r,(*old)();
 

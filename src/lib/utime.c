@@ -1,8 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC int utime(name, timp)
-char *name;
-long timp[2];
+PUBLIC int 
+utime (char *name, long timp[2])
 {
   M.m2_i1 = len(name);
   M.m2_l1 = timp[0];

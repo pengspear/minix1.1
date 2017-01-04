@@ -1,8 +1,8 @@
 #include "../include/lib.h"
 
 struct tbuf { long b1, b2, b3, b4;};
-PUBLIC int times(buf)
-struct tbuf *buf;
+PUBLIC int 
+times (struct tbuf *buf)
 {
   int k;
   k = callm1(FS, TIMES, 0, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);

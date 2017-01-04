@@ -1,10 +1,8 @@
 #include "../include/stdio.h"
 
 
-char *fgets(str, n, file)
-char *str;
-unsigned n;
-FILE *file;
+char *
+fgets (char *str, unsigned n, FILE *file)
 {
 	register int ch;
 	register char *ptr;

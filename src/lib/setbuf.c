@@ -1,9 +1,8 @@
 #include	"../include/stdio.h"
 
 
-setbuf(iop, buffer)
-FILE *iop;
-char *buffer;
+void
+setbuf (FILE *iop, char *buffer)
 {
 	if ( iop->_buf && testflag(iop,IOMYBUF) )
 		free(iop->_buf);

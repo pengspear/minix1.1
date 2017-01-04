@@ -1,8 +1,7 @@
 #include "../include/stdio.h"
 
-ungetc(ch, iop)
-int ch;
-FILE *iop;
+int 
+ungetc (int ch, FILE *iop)
 {
 	if ( ch < 0  || !testflag(iop,READMODE) || testflag(iop,UNBUFF) ) 
 		return( EOF );

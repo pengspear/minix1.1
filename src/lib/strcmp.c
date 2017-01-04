@@ -1,5 +1,5 @@
-int strcmp(s1, s2)
-register char *s1, *s2;
+int 
+strcmp (register char *s1, register char *s2)
 {
 /* Compare 2 strings. */
 

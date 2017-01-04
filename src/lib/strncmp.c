@@ -1,6 +1,5 @@
-int strncmp(s1, s2, n)
-register char *s1, *s2;
-int n;
+int 
+strncmp (register char *s1, register char *s2, int n)
 {
 /* Compare two strings, but at most n characters. */
 

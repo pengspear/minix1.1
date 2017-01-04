@@ -1,8 +1,8 @@
 #include "../include/stdio.h"
 
 
-fflush(iop)
-FILE *iop;
+int 
+fflush (FILE *iop)
 {
 	int count;
 

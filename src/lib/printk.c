@@ -4,12 +4,12 @@
  * has been defined as printk there.
  */
 
+static int bintoascii(long, int, char*);
 
 #define MAXDIGITS         12
 
-printk(s, arglist)
-char *s;
-int *arglist;
+void
+printk (char *s, int *arglist)
 {
   int w, k, r, *valp;
   unsigned u;
@@ -57,10 +57,8 @@ int *arglist;
 
 
 
-static int bintoascii(num, radix, a)
-long num;
-int radix;
-char a[MAXDIGITS];
+static int 
+bintoascii (long num, int radix, char a[MAXDIGITS])
 {
 
   int i, n, hit, negative;

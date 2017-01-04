@@ -1,30 +1,31 @@
-| See ../h/com.h for C definitions
-SEND = 1
-RECEIVE = 2
-BOTH = 3
-SYSVEC = 32
+# See ../h/com.h for C definitions
+        .equ    SEND, 1
+        .equ    RECEIVE, 2
+        .equ    BOTH, 3
+        .equ    SYSVEC, 32
 
-|*========================================================================*
-|                           send and receive                              *
-|*========================================================================*
-| send(), receive(), sendrec() all save bp, but destroy ax, bx, and cx.
-.globl _send, _receive, _sendrec
-_send:	mov cx,*SEND		| send(dest, ptr)
-	jmp L0
+#*========================================================================*
+#                           send and receive                              *
+#*========================================================================*
+# send(), receive(), sendrec() all save bp, but destroy ax, bx, and cx.
+        .globl send, receive, sendrec
+send:  movw    $SEND, %cx      # send(dest, ptr)
+        jmp     .L0
 
-_receive:
-	mov cx,*RECEIVE		| receive(src, ptr)
-	jmp L0
+receive:
+        movw    $RECEIVE, %cx   # receive(src, ptr)
+        jmp     .L0
 
-_sendrec:
-	mov cx,*BOTH		| sendrec(srcdest, ptr)
-	jmp L0
+sendrec:
+        movw    $BOTH, %cx      # sendrec(srcdest, ptr)
+        jmp     .L0
 
-  L0:	push bp			| save bp
-	mov bp,sp		| can't index off sp
-	mov ax,4(bp)		| ax = dest-src
-	mov bx,6(bp)		| bx = message pointer
-	int SYSVEC		| trap to the kernel
-	pop bp			| restore bp
-	ret			| return
+  .L0:  pushw   %bp             # save bp
+        movw    %sp,%bp         # can't index off sp
+        movw    4(%bp), %ax     # ax = dest-src
+        movw    6(%bp), %bx     # bx = message pointer
+        int     $SYSVEC
+        popw    %bp             # restore bp
+        ret                     # return
+
 

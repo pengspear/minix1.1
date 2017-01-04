@@ -1,7 +1,7 @@
 #include "../include/lib.h"
 
-PUBLIC long time(tp)
-long *tp;
+PUBLIC long 
+time (long *tp)
 {
   int k;
   long l;

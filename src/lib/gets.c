@@ -1,7 +1,7 @@
 #include "../include/stdio.h"
 
-char *gets(str)
-char *str;
+char *
+gets (char *str)
 {
 	register int ch;
 	register char *ptr;

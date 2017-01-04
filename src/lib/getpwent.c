@@ -20,7 +20,8 @@ PRIVATE int   _pw = -1;
 PRIVATE int   _bufcnt;
 PRIVATE struct passwd    pwd;
 
-setpwent() 
+int 
+setpwent (void) 
 {
 	if (_pw >= 0)
 		lseek (_pw, 0L, 0);
@@ -32,7 +33,8 @@ setpwent()
 }
 
 
-endpwent () 
+void
+endpwent (void) 
 {
 	if (_pw >= 0)
 		close (_pw);
@@ -41,7 +43,8 @@ endpwent ()
 	_bufcnt = 0;
 }
 
-static getline () 
+static int
+getline (void) 
 {
 	if (_pw < 0 && setpwent () < 0)
 		return (0);
@@ -62,7 +65,8 @@ static getline ()
 	return (1);
 }
 
-static skip_period () 
+static void
+skip_period (void) 
 {
 	while (*_buf != ':')
 		_buf++;
@@ -70,36 +74,37 @@ static skip_period ()
 	*_buf++ = '\0';
 }
 
-struct passwd  *getpwent () 
+struct passwd *
+getpwent (void) 
 {
 	if (getline () == 0)
 		return (0);
 
-	pwd.name = _buf;
+	pwd.pw_name = _buf;
 	skip_period ();
-	pwd.passwd = _buf;
+	pwd.pw_passwd = _buf;
 	skip_period ();
-	pwd.uid = atoi (_buf);
+	pwd.pw_uid = atoi (_buf);
 	skip_period ();
-	pwd.gid = atoi (_buf);
+	pwd.pw_gid = atoi (_buf);
 	skip_period ();
-	pwd.gecos = _buf;
+	pwd.pw_gecos = _buf;
 	skip_period ();
-	pwd.dir = _buf;
+	pwd.pw_dir = _buf;
 	skip_period ();
-	pwd.shell = _buf;
+	pwd.pw_shell = _buf;
 
 	return (&pwd);
 }
 
-struct passwd  *getpwnam (name)
-char   *name;
+struct passwd *
+getpwnam (char *name)
 {
 	struct passwd  *pwd;
 
 	setpwent ();
 	while ((pwd = getpwent ()) != 0)
-		if (!strcmp (pwd -> name, name))
+		if (!strcmp (pwd -> pw_name, name))
 			break;
 	endpwent ();
 	if (pwd != 0)
@@ -108,14 +113,14 @@ char   *name;
 		return (0);
 }
 
-struct passwd  *getpwuid (uid)
-int     uid;
+struct passwd *
+getpwuid (int uid)
 {
 	struct passwd  *pwd;
 
 	setpwent ();
 	while ((pwd = getpwent ()) != 0)
-		if (pwd -> uid == uid)
+		if (pwd -> pw_uid == uid)
 			break;
 	endpwent ();
 	if (pwd != 0)

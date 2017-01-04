@@ -10,8 +10,8 @@ extern bcopy();
 extern char *sbrk();
 static char *bottom, *top;
 
-static grow(len)
-unsigned len;
+static int
+grow (unsigned int len)
 {
   register char *p;
 
@@ -27,8 +27,8 @@ unsigned len;
   return(1);
 }
 
-char *malloc(size)
-unsigned size;
+char *
+malloc (unsigned int size)
 {
   register char *p, *next, *new;
   register unsigned len = ALIGN(size, sizeof(char *)) + sizeof(char *);
@@ -54,9 +54,8 @@ unsigned size;
   return grow(len) ? malloc(size) : 0;
 }
 
-char *realloc(old, size)
-char *old;
-unsigned size;
+char *
+realloc (char *old, unsigned int size)
 {
   register char *p = old - sizeof(char *), *next, *new;
   register unsigned len = ALIGN(size, sizeof(char *)) + sizeof(char *), n;
@@ -81,8 +80,8 @@ unsigned size;
   return(new);
 }
 
-free(p)
-char *p;
+int 
+free (char *p)
 {
   * (vir_bytes *) (p - sizeof(char *)) &= ~BUSY;
 }

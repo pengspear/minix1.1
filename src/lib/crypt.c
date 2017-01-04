@@ -1,8 +1,8 @@
-char *crypt(pw, salt)
-char *pw, *salt;
+char *
+crypt (char *pw, char *salt)
 {
 	static char buf[14];
-	register char bits[67];
+	char bits[67];
 	register int i;
 	register int j, rot;
 

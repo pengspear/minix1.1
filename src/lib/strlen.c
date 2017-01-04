@@ -1,5 +1,5 @@
-int strlen(s)
-char *s;
+int 
+strlen (char *s)
 {
 /* Return length of s. */
 

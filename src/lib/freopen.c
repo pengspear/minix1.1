@@ -1,8 +1,7 @@
 #include "../include/stdio.h"
 
-FILE *freopen(name,mode,stream)
-char *name,*mode;
-FILE *stream;
+FILE *
+freopen (char *name, char *mode, FILE *stream)
 {
 	FILE *fopen();
 

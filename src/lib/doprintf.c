@@ -3,14 +3,15 @@
 #define MAXDIGITS 12
 #define PRIVATE   static
 
+PRIVATE void _bintoascii(long, int, char*);
+PRIVATE void _printit(char*, int, int, char, int, FILE*);
+
 /* This is the same as varargs , on BSD systems */
 
 #define GET_ARG(arglist,mode) ((mode *)(arglist += sizeof(mode)))[-1]
 
-_doprintf(fp, format, args)
-FILE *fp;
-register char *format;
-int args;
+void
+_doprintf (FILE *fp, register char *format, int args)
 {
 	register char *vl;
 	int  r,
@@ -116,10 +117,8 @@ int args;
 
 
 
-PRIVATE _bintoascii (num, radix, a)
-long    num;
-int     radix;
-char    *a;
+PRIVATE void
+_bintoascii (long num, int radix, char *a)
 {
 	char b[MAXDIGITS];
 	int hit, negative;
@@ -182,12 +181,8 @@ char    *a;
 }
 
 
-PRIVATE _printit(str, w1, w2, padchar, length, file)
-char *str;
-int w1, w2;
-char padchar;
-int length;
-FILE *file;
+PRIVATE void
+_printit (char *str, int w1, int w2, char padchar, int length, FILE *file)
 {
 	int len2 = length;
 	int temp;

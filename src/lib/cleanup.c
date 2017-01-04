@@ -1,6 +1,7 @@
 #include "../include/stdio.h"
 
-_cleanup()
+void
+_cleanup (void)
 {
 	register int i;
 

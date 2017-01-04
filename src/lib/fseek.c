@@ -1,9 +1,8 @@
 #include "../include/stdio.h"
 
 
-fseek(iop, offset, where)
-FILE *iop;
-long offset;
+int 
+fseek (FILE *iop, long offset, int where)
 {
 	int  count;
 	long lseek();

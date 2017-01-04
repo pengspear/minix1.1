@@ -1,9 +1,7 @@
 #include "../include/stdio.h"
 
-fread(ptr, size, count, file)
-char *ptr;
-unsigned size, count;
-FILE *file;
+int 
+fread (char *ptr, unsigned size, unsigned count, FILE *file)
 {
 	register int c;
 	unsigned ndone = 0, s;

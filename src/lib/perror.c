@@ -40,9 +40,10 @@ char *error_message[NERROR+1] = {
         "Result too large"
 };
 
+static int slen(char*);
 
-perror(s)
-char *s;
+int 
+perror (char *s)
 {
   if (errno < 0 || errno > NERROR) {
 	write(2, "Invalid errno\n", 14);
@@ -54,8 +55,8 @@ char *s;
   }
 }
 
-static int slen(s)
-char *s;
+static int 
+slen (char *s)
 {
   int k = 0;
 
