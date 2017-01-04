@@ -58,10 +58,18 @@ PUBLIC int pr_busy;		/* TRUE when printing, else FALSE */
 PUBLIC int cum_count;		/* cumulative # characters printed */
 PUBLIC int prev_ct;		/* value of cum_count 100 msec ago */
 
+PRIVATE void do_write(message*);
+PRIVATE void do_done(message*);
+PRIVATE void do_cancel(message*);
+PRIVATE void reply(int, int, int, int);
+PRIVATE void pr_error(int);
+PRIVATE void print_init(void);
+
 /*===========================================================================*
  *				printer_task				     *
  *===========================================================================*/
-PUBLIC printer_task()
+PUBLIC void
+printer_task (void)
 {
 /* Main routine of the printer task. */
 
@@ -84,15 +92,17 @@ PUBLIC printer_task()
 /*===========================================================================*
  *				do_write				     *
  *===========================================================================*/
-PRIVATE do_write(m_ptr)
-message *m_ptr;			/* pointer to the newly arrived message */
+PRIVATE void
+do_write (
+    message *m_ptr			/* pointer to the newly arrived message */
+)
 {
 /* The printer is used by sending TTY_WRITE messages to it. Process one. */
 
   int i, j, r, value;
   struct proc *rp;
   phys_bytes phys;
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   r = OK;			/* so far, no errors */
 
@@ -144,8 +154,10 @@ message *m_ptr;			/* pointer to the newly arrived message */
 /*===========================================================================*
  *				do_done					     *
  *===========================================================================*/
-PRIVATE do_done(m_ptr)
-message *m_ptr;			/* pointer to the newly arrived message */
+PRIVATE void
+do_done (
+    message *m_ptr			/* pointer to the newly arrived message */
+)
 {
 /* Printing is finished.  Reply to caller (FS). */
 
@@ -163,8 +175,10 @@ message *m_ptr;			/* pointer to the newly arrived message */
 /*===========================================================================*
  *				do_cancel				     *
  *===========================================================================*/
-PRIVATE do_cancel(m_ptr)
-message *m_ptr;			/* pointer to the newly arrived message */
+PRIVATE void
+do_cancel (
+    message *m_ptr			/* pointer to the newly arrived message */
+)
 {
 /* Cancel a print request that has already started.  Usually this means that
  * the process doing the printing has been killed by a signal.
@@ -181,11 +195,13 @@ message *m_ptr;			/* pointer to the newly arrived message */
 /*===========================================================================*
  *				reply					     *
  *===========================================================================*/
-PRIVATE reply(code, replyee, process, status)
-int code;			/* TASK_REPLY or REVIVE */
-int replyee;			/* destination for message (normally FS) */
-int process;			/* which user requested the printing */
-int status;			/* number of  chars printed or error code */
+PRIVATE void
+reply (
+    int code,			/* TASK_REPLY or REVIVE */
+    int replyee,			/* destination for message (normally FS) */
+    int process,			/* which user requested the printing */
+    int status			/* number of  chars printed or error code */
+)
 {
 /* Send a reply telling FS that printing has started or stopped. */
 
@@ -201,8 +217,10 @@ int status;			/* number of  chars printed or error code */
 /*===========================================================================*
  *				pr_error				     *
  *===========================================================================*/
-PRIVATE pr_error(status)
-int status;			/* printer status byte */
+PRIVATE void
+pr_error (
+    int status			/* printer status byte */
+)
 {
 /* The printer is not ready.  Display a message on the console telling why. */
 
@@ -215,7 +233,8 @@ int status;			/* printer status byte */
 /*===========================================================================*
  *				print_init				     *
  *===========================================================================*/
-PRIVATE print_init()
+PRIVATE void
+print_init (void)
 {
 /* Color display uses 0x378 for printer; mono display uses 0x3BC. */
 
@@ -233,7 +252,8 @@ PRIVATE print_init()
 /*===========================================================================*
  *				pr_char				     *
  *===========================================================================*/
-PUBLIC pr_char()
+PUBLIC void
+pr_char (void)
 {
 /* This is the interrupt handler.  When a character has been printed, an
  * interrupt occurs, and the assembly code routine trapped to calls pr_char().

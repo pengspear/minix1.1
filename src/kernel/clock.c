@@ -54,10 +54,18 @@ PRIVATE struct proc *prev_ptr;	/* last user process run by clock task */
 PRIVATE message mc;		/* message buffer for both input and output */
 PRIVATE int (*watch_dog[NR_TASKS+1])();	/* watch_dog functions to call */
 
+PRIVATE void do_setalarm(message *);
+PRIVATE void do_get_time(void);
+PRIVATE void do_set_time(message *);
+PRIVATE void do_clocktick(void);
+PRIVATE void accounting(void);
+PRIVATE void init_clock(void);
+
 /*===========================================================================*
  *				clock_task				     *
  *===========================================================================*/
-PUBLIC clock_task()
+PUBLIC void
+clock_task (void)
 {
 /* Main program of clock task.  It determines which of the 4 possible
  * calls this is by looking at 'mc.m_type'.   Then it dispatches.
@@ -90,8 +98,10 @@ PUBLIC clock_task()
 /*===========================================================================*
  *				do_setalarm				     *
  *===========================================================================*/
-PRIVATE do_setalarm(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE void
+do_setalarm (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* A process wants an alarm signal or a task wants a given watch_dog function
  * called after a specified interval.  Record the request and check to see
@@ -123,7 +133,8 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_get_time				     *
  *===========================================================================*/
-PRIVATE do_get_time()
+PRIVATE void
+do_get_time (void)
 {
 /* Get and return the current clock time in ticks. */
 
@@ -135,8 +146,10 @@ PRIVATE do_get_time()
 /*===========================================================================*
  *				do_set_time				     *
  *===========================================================================*/
-PRIVATE do_set_time(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE void
+do_set_time (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Set the real time clock.  Only the superuser can use this call. */
 
@@ -147,7 +160,8 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_clocktick				     *
  *===========================================================================*/
-PRIVATE do_clocktick()
+PRIVATE void
+do_clocktick (void)
 {
 /* This routine called on every clock tick. */
 
@@ -206,7 +220,8 @@ PRIVATE do_clocktick()
 /*===========================================================================*
  *				accounting				     *
  *===========================================================================*/
-PRIVATE accounting()
+PRIVATE void
+accounting (void)
 {
 /* Update user and system accounting times.  The variable 'bill_ptr' is always
  * kept pointing to the process to charge for CPU usage.  If the CPU was in
@@ -225,7 +240,8 @@ PRIVATE accounting()
 /*===========================================================================*
  *				init_clock				     *
  *===========================================================================*/
-PRIVATE init_clock()
+PRIVATE void
+init_clock (void)
 {
 /* Initialize channel 2 of the 8253A timer to e.g. 60 Hz. */
 

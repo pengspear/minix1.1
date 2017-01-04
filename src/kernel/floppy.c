@@ -152,10 +152,24 @@ PRIVATE int nr_blocks[NT]     = {720,  720,  720,  2400}; /* sectors/diskette*/
 PRIVATE int steps_per_cyl[NT] = {1,    2,    2,    1};	  /* 2 = dbl step */
 PRIVATE int mtr_setup[NT]     = {HZ/4,HZ/4,3*HZ/4,3*HZ/4};/* in ticks */
 
+PRIVATE int do_rdwt(message *);
+PRIVATE void dma_setup(struct floppy *);
+PRIVATE void start_motor(struct floppy *);
+PRIVATE int stop_motor(void);
+PRIVATE int seek(struct floppy *);
+PRIVATE int transfer(register struct floppy *);
+PRIVATE int fdc_results(register struct floppy *);
+PRIVATE void fdc_out(int);
+PRIVATE int recalibrate(register struct floppy *);
+PRIVATE void reset(void);
+PRIVATE void clock_mess(int, int (*)(void));
+PRIVATE int send_mess(void);
+
 /*===========================================================================*
  *				floppy_task				     * 
  *===========================================================================*/
-PUBLIC floppy_task()
+PUBLIC void
+floppy_task (void)
 {
 /* Main program of the floppy disk driver task. */
 
@@ -191,8 +205,10 @@ PUBLIC floppy_task()
 /*===========================================================================*
  *				do_rdwt					     * 
  *===========================================================================*/
-PRIVATE int do_rdwt(m_ptr)
-message *m_ptr;			/* pointer to read or write message */
+PRIVATE int 
+do_rdwt (
+    message *m_ptr			/* pointer to read or write message */
+)
 {
 /* Carry out a read or write request from the disk. */
   register struct floppy *fp;
@@ -264,8 +280,10 @@ message *m_ptr;			/* pointer to read or write message */
 /*===========================================================================*
  *				dma_setup				     * 
  *===========================================================================*/
-PRIVATE dma_setup(fp)
-struct floppy *fp;		/* pointer to the drive struct */
+PRIVATE void
+dma_setup (
+    struct floppy *fp		/* pointer to the drive struct */
+)
 {
 /* The IBM PC can perform DMA operations by using the DMA chip.  To use it,
  * the DMA (Direct Memory Access) chip is loaded with the 20-bit memory address
@@ -278,7 +296,7 @@ struct floppy *fp;		/* pointer to the drive struct */
   int mode, low_addr, high_addr, top_addr, low_ct, high_ct, top_end;
   vir_bytes vir, ct;
   phys_bytes user_phys;
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   mode = (fp->fl_opcode == DISK_READ ? DMA_READ : DMA_WRITE);
   vir = (vir_bytes) fp->fl_address;
@@ -316,8 +334,10 @@ struct floppy *fp;		/* pointer to the drive struct */
 /*===========================================================================*
  *				start_motor				     * 
  *===========================================================================*/
-PRIVATE start_motor(fp)
-struct floppy *fp;		/* pointer to the drive struct */
+PRIVATE void
+start_motor (
+    struct floppy *fp		/* pointer to the drive struct */
+)
 {
 /* Control of the floppy disk motors is a big pain.  If a motor is off, you
  * have to turn it on first, which takes 1/2 second.  You can't leave it on
@@ -353,7 +373,8 @@ struct floppy *fp;		/* pointer to the drive struct */
 /*===========================================================================*
  *				stop_motor				     * 
  *===========================================================================*/
-PRIVATE stop_motor()
+PRIVATE int
+stop_motor (void)
 {
 /* This routine is called by the clock interrupt after several seconds have
  * elapsed with no floppy disk activity.  It checks to see if any drives are
@@ -370,8 +391,10 @@ PRIVATE stop_motor()
 /*===========================================================================*
  *				seek					     * 
  *===========================================================================*/
-PRIVATE int seek(fp)
-struct floppy *fp;		/* pointer to the drive struct */
+PRIVATE int 
+seek (
+    struct floppy *fp		/* pointer to the drive struct */
+)
 {
 /* Issue a SEEK command on the indicated drive unless the arm is already 
  * positioned on the correct cylinder.
@@ -405,8 +428,10 @@ struct floppy *fp;		/* pointer to the drive struct */
 /*===========================================================================*
  *				transfer				     * 
  *===========================================================================*/
-PRIVATE int transfer(fp)
-register struct floppy *fp;	/* pointer to the drive struct */
+PRIVATE int 
+transfer (
+    register struct floppy *fp	/* pointer to the drive struct */
+)
 {
 /* The drive is now on the proper cylinder.  Read or write 1 block. */
 
@@ -460,8 +485,10 @@ register struct floppy *fp;	/* pointer to the drive struct */
 /*===========================================================================*
  *				fdc_results				     * 
  *===========================================================================*/
-PRIVATE int fdc_results(fp)
-register struct floppy *fp;	/* pointer to the drive struct */
+PRIVATE int 
+fdc_results (
+    register struct floppy *fp	/* pointer to the drive struct */
+)
 {
 /* Extract results from the controller after an operation. */
 
@@ -494,8 +521,10 @@ register struct floppy *fp;	/* pointer to the drive struct */
 /*===========================================================================*
  *				fdc_out					     * 
  *===========================================================================*/
-PRIVATE fdc_out(val)
-int val;			/* write this byte to floppy disk controller */
+PRIVATE void
+fdc_out (
+    int val			/* write this byte to floppy disk controller */
+)
 {
 /* Output a byte to the controller.  This is not entirely trivial, since you
  * can only write to it when it is listening, and it decides when to listen.
@@ -524,8 +553,10 @@ int val;			/* write this byte to floppy disk controller */
 /*===========================================================================*
  *				recalibrate				     * 
  *===========================================================================*/
-PRIVATE int recalibrate(fp)
-register struct floppy *fp;	/* pointer tot he drive struct */
+PRIVATE int 
+recalibrate (
+    register struct floppy *fp	/* pointer tot he drive struct */
+)
 {
 /* The floppy disk controller has no way of determining its absolute arm
  * position (cylinder).  Instead, it steps the arm a cylinder at a time and
@@ -565,7 +596,8 @@ register struct floppy *fp;	/* pointer tot he drive struct */
 /*===========================================================================*
  *				reset					     * 
  *===========================================================================*/
-PRIVATE reset()
+PRIVATE void
+reset (void)
 {
 /* Issue a reset to the controller.  This is done after any catastrophe,
  * like the controller refusing to respond.
@@ -602,9 +634,11 @@ PRIVATE reset()
 /*===========================================================================*
  *				clock_mess				     * 
  *===========================================================================*/
-PRIVATE clock_mess(ticks, func)
-int ticks;			/* how many clock ticks to wait */
-int (*func)();			/* function to call upon time out */
+PRIVATE void
+clock_mess (
+    int ticks,			/* how many clock ticks to wait */
+    int (*func)(void)			/* function to call upon time out */
+)
 {
 /* Send the clock task a message. */
 
@@ -619,7 +653,8 @@ int (*func)();			/* function to call upon time out */
 /*===========================================================================*
  *				send_mess				     * 
  *===========================================================================*/
-PRIVATE send_mess()
+PRIVATE int
+send_mess (void)
 {
 /* This routine is called when the clock task has timed out on motor startup.*/
 

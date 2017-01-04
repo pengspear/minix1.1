@@ -18,7 +18,8 @@ int vargv;
 /*===========================================================================*
  *				DEBUG routines here			     * 
  *===========================================================================*/
-p_dmp()
+void
+p_dmp (void)
 {
 /* Proc table dump */
 
@@ -27,7 +28,7 @@ p_dmp()
   vir_bytes base, limit, first, last;
   phys_bytes ltmp, dst;
   int index;
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   printf(
   "\nproc  -pid- -pc-  -sp-  flag  user  -sys-  base limit recv   command\n");
@@ -71,7 +72,8 @@ p_dmp()
 
 
 
-map_dmp()
+void
+map_dmp (void)
 {
   register struct proc *rp;
   vir_bytes base, limit, first, last;
@@ -98,8 +100,8 @@ map_dmp()
 
 char *nayme[]= {"PRINTR", "TTY   ", "WINCHE", "FLOPPY", "RAMDSK", "CLOCK ", 
 		"SYS   ", "HARDWR", "MM    ", "FS    ", "INIT  "};
-prname(i)
-int i;
+void
+prname (int i)
 {
   if (i == ANY+NR_TASKS)
 	printf("ANY   ");
@@ -109,16 +111,15 @@ int i;
 	printf("%4d  ", i-NR_TASKS);
 }
 
-set_name(proc_nr, ptr)
-int proc_nr;
-char *ptr;
+void
+set_name (int proc_nr, char *ptr)
 {
 /* When an EXEC call is done, the kernel is told about the stack pointer.
  * It uses the stack pointer to find the command line, for dumping
  * purposes.
  */
 
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
   phys_bytes src, dst, count;
 
   if (ptr == (char *) 0) {
