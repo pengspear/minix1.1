@@ -40,7 +40,8 @@ PRIVATE phys_bytes ram_limit[NR_RAMS];	/* limit of RAM disk per minor dev. */
 /*===========================================================================*
  *				mem_task				     * 
  *===========================================================================*/
-PUBLIC mem_task()
+PUBLIC void
+mem_task (void)
 {
 /* Main program of the disk driver task. */
 
@@ -85,8 +86,10 @@ PUBLIC mem_task()
 /*===========================================================================*
  *				do_mem					     * 
  *===========================================================================*/
-PRIVATE int do_mem(m_ptr)
-register message *m_ptr;	/* pointer to read or write message */
+PUBLIC int 
+do_mem (
+    register message *m_ptr	/* pointer to read or write message */
+)
 {
 /* Read or write /dev/null, /dev/mem, /dev/kmem, or /dev/ram. */
 
@@ -94,7 +97,7 @@ register message *m_ptr;	/* pointer to read or write message */
   phys_bytes mem_phys, user_phys;
   struct proc *rp;
   extern phys_clicks get_base();
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   /* Get minor device number and check for /dev/null. */
   device = m_ptr->DEVICE;
@@ -125,8 +128,10 @@ register message *m_ptr;	/* pointer to read or write message */
 /*===========================================================================*
  *				do_setup				     * 
  *===========================================================================*/
-PRIVATE int do_setup(m_ptr)
-message *m_ptr;			/* pointer to read or write message */
+PUBLIC int 
+do_setup (
+    message *m_ptr			/* pointer to read or write message */
+)
 {
 /* Set parameters for one of the disk RAMs. */
 

@@ -23,12 +23,16 @@
 #include "glo.h"
 #include "proc.h"
 
+PRIVATE int mini_rec(int, int, message*);
+
 /*===========================================================================*
  *				interrupt				     * 
  *===========================================================================*/
-PUBLIC interrupt(task, m_ptr)
-int task;			/* number of task to be started */
-message *m_ptr;			/* interrupt message to send to the task */
+PUBLIC void
+interrupt(
+    int task,			/* number of task to be started */
+    message *m_ptr			/* interrupt message to send to the task */
+)
 {
 /* An interrupt has occurred.  Schedule the task that handles it. */
 
@@ -78,11 +82,13 @@ message *m_ptr;			/* interrupt message to send to the task */
 /*===========================================================================*
  *				sys_call				     * 
  *===========================================================================*/
-PUBLIC sys_call(function, caller, src_dest, m_ptr)
-int function;			/* SEND, RECEIVE, or BOTH */
-int caller;			/* who is making this call */
-int src_dest;			/* source to receive from or dest to send to */
-message *m_ptr;			/* pointer to message */
+PUBLIC void
+sys_call (
+    int function,			/* SEND, RECEIVE, or BOTH */
+    int caller,			/* who is making this call */
+    int src_dest,			/* source to receive from or dest to send to */
+    message *m_ptr			/* pointer to message */
+)
 {
 /* The only system calls that exist in MINIX are sending and receiving
  * messages.  These are done by trapping to the kernel with an INT instruction.
@@ -120,10 +126,12 @@ message *m_ptr;			/* pointer to message */
 /*===========================================================================*
  *				mini_send				     * 
  *===========================================================================*/
-PUBLIC int mini_send(caller, dest, m_ptr)
-int caller;			/* who is trying to send a message? */
-int dest;			/* to whom is message being sent? */
-message *m_ptr;			/* pointer to message buffer */
+PUBLIC int 
+mini_send (
+    int caller,			/* who is trying to send a message? */
+    int dest,			/* to whom is message being sent? */
+    message *m_ptr			/* pointer to message buffer */
+)
 {
 /* Send a message from 'caller' to 'dest'.  If 'dest' is blocked waiting for
  * this message, copy the message to it and unblock 'dest'.  If 'dest' is not
@@ -181,10 +189,12 @@ message *m_ptr;			/* pointer to message buffer */
 /*===========================================================================*
  *				mini_rec				     * 
  *===========================================================================*/
-PRIVATE int mini_rec(caller, src, m_ptr)
-int caller;			/* process trying to get message */
-int src;			/* which message source is wanted (or ANY) */
-message *m_ptr;			/* pointer to message buffer */
+PRIVATE int 
+mini_rec (
+    int caller,			/* process trying to get message */
+    int src,			/* which message source is wanted (or ANY) */
+    message *m_ptr			/* pointer to message buffer */
+)
 {
 /* A process or task wants to get a message.  If one is already queued,
  * acquire it and deblock the sender.  If no message from the desired source
@@ -235,7 +245,8 @@ message *m_ptr;			/* pointer to message buffer */
 /*===========================================================================*
  *				pick_proc				     * 
  *===========================================================================*/
-PUBLIC pick_proc()
+PUBLIC void
+pick_proc (void)
 {
 /* Decide who to run now. */
 
@@ -271,8 +282,10 @@ PUBLIC pick_proc()
 /*===========================================================================*
  *				ready					     * 
  *===========================================================================*/
-PUBLIC ready(rp)
-register struct proc *rp;	/* this process is now runnable */
+PUBLIC void
+ready (
+    register struct proc *rp	/* this process is now runnable */
+)
 {
 /* Add 'rp' to the end of one of the queues of runnable processes. Three
  * queues are maintained:
@@ -302,8 +315,10 @@ register struct proc *rp;	/* this process is now runnable */
 /*===========================================================================*
  *				unready					     * 
  *===========================================================================*/
-PUBLIC unready(rp)
-register struct proc *rp;	/* this process is no longer runnable */
+PUBLIC void
+unready (
+    register struct proc *rp	/* this process is no longer runnable */
+)
 {
 /* A process has blocked. */
 
@@ -335,7 +350,8 @@ register struct proc *rp;	/* this process is no longer runnable */
 /*===========================================================================*
  *				sched					     * 
  *===========================================================================*/
-PUBLIC sched()
+PUBLIC void
+sched (void)
 {
 /* The current process has run too long.  If another low priority (user)
  * process is runnable, put the current process on the end of the user queue,

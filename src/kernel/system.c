@@ -67,15 +67,26 @@
 
 #define COPY_UNIT     65534L	/* max bytes to copy at once */
 
-extern phys_bytes umap();
+extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
 PRIVATE message m;
 PRIVATE char sig_stuff[SIG_PUSH_BYTES];	/* used to send signals to processes */
 
+PRIVATE int do_fork(message*);
+PRIVATE int do_newmap(message*);
+PRIVATE int do_exec(message*);
+PRIVATE int do_xit(message*);
+PRIVATE int do_getsp(message*);
+PRIVATE int do_times(message*);
+PRIVATE int do_abort(message*);
+PRIVATE int do_sig(message*);
+PRIVATE int do_copy(message*);
+
 /*===========================================================================*
  *				sys_task				     *
  *===========================================================================*/
-PUBLIC sys_task()
+PUBLIC void
+sys_task (void)
 {
 /* Main entry point of sys_task.  Get the message and dispatch on type. */
 
@@ -106,8 +117,10 @@ PUBLIC sys_task()
 /*===========================================================================*
  *				do_fork					     * 
  *===========================================================================*/
-PRIVATE int do_fork(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_fork (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_fork().  'k1' has forked.  The child is 'k2'. */
 
@@ -146,8 +159,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_newmap				     * 
  *===========================================================================*/
-PRIVATE int do_newmap(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_newmap (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_newmap().  Fetch the memory map from MM. */
 
@@ -194,8 +209,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_exec					     * 
  *===========================================================================*/
-PRIVATE int do_exec(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_exec (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_exec().  A process has done a successful EXEC. Patch it up. */
 
@@ -220,8 +237,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_xit					     * 
  *===========================================================================*/
-PRIVATE int do_xit(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_xit (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_xit().  A process has exited. */
 
@@ -275,8 +294,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_getsp				     * 
  *===========================================================================*/
-PRIVATE int do_getsp(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_getsp (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_getsp().  MM wants to know what sp is. */
 
@@ -294,8 +315,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_times				     * 
  *===========================================================================*/
-PRIVATE int do_times(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_times (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_times().  Retrieve the accounting information. */
 
@@ -318,8 +341,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_abort				     * 
  *===========================================================================*/
-PRIVATE int do_abort(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_abort (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_abort.  MINIX is unable to continue.  Terminate operation. */
 
@@ -330,8 +355,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_sig					     * 
  *===========================================================================*/
-PRIVATE int do_sig(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_sig (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_sig(). Signal a process.  The stack is known to be big enough. */
 
@@ -372,8 +399,10 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_copy					     *
  *===========================================================================*/
-PRIVATE int do_copy(m_ptr)
-message *m_ptr;			/* pointer to request message */
+PRIVATE int 
+do_copy (
+    message *m_ptr			/* pointer to request message */
+)
 {
 /* Handle sys_copy().  Copy data for MM or FS. */
 
@@ -410,9 +439,11 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				cause_sig				     * 
  *===========================================================================*/
-PUBLIC cause_sig(proc_nr, sig_nr)
-int proc_nr;			/* process to be signalled */
-int sig_nr;			/* signal to be sent in range 1 - 16 */
+PUBLIC 
+cause_sig (
+    int proc_nr,			/* process to be signalled */
+    int sig_nr			/* signal to be sent in range 1 - 16 */
+)
 {
 /* A task wants to send a signal to a process.   Examples of such tasks are:
  *   TTY wanting to cause SIGINT upon getting a DEL
@@ -437,8 +468,10 @@ int sig_nr;			/* signal to be sent in range 1 - 16 */
 /*===========================================================================*
  *				inform					     * 
  *===========================================================================*/
-PUBLIC inform(proc_nr)
-int proc_nr;			/* MM_PROC_NR or FS_PROC_NR */
+PUBLIC 
+inform (
+    int proc_nr			/* MM_PROC_NR or FS_PROC_NR */
+)
 {
 /* When a signal is detected by the kernel (e.g., DEL), or generated by a task
  * (e.g. clock task for SIGALRM), cause_sig() is called to set a bit in the
@@ -471,11 +504,13 @@ int proc_nr;			/* MM_PROC_NR or FS_PROC_NR */
 /*===========================================================================*
  *				umap					     * 
  *===========================================================================*/
-PUBLIC phys_bytes umap(rp, seg, vir_addr, bytes)
-register struct proc *rp;	/* pointer to proc table entry for process */
-int seg;			/* T, D, or S segment */
-vir_bytes vir_addr;		/* virtual address in bytes within the seg */
-vir_bytes bytes;		/* # of bytes to be copied */
+PUBLIC phys_bytes 
+umap (
+    register struct proc *rp,	/* pointer to proc table entry for process */
+    int seg,			/* T, D, or S segment */
+    vir_bytes vir_addr,		/* virtual address in bytes within the seg */
+    vir_bytes bytes		/* # of bytes to be copied */
+)
 {
 /* Calculate the physical memory address for a given virtual address. */
   vir_clicks vc;		/* the virtual address in clicks */

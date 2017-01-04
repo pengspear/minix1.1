@@ -104,10 +104,23 @@ PRIVATE struct param {
 	int max_ecc;		/* Maximum ECC burst length */
 } param0, param1;
 
+PRIVATE int w_do_rdwt(message*);
+PRIVATE void w_dma_setup(struct wini*);
+PRIVATE int w_transfer(register struct wini*);
+PRIVATE int win_results(register struct wini*);
+PRIVATE int w_reset(void);
+PRIVATE int win_init(void);
+PRIVATE int check_init(void);
+PRIVATE int read_ecc(void);
+PRIVATE int hd_wait(register int);
+PRIVATE int com_out (int);
+PRIVATE void copy_prt (int);
+
 /*===========================================================================*
  *				winchester_task				     * 
  *===========================================================================*/
-PUBLIC winchester_task()
+PUBLIC void
+winchester_task (void)
 {
 /* Main program of the winchester disk driver task. */
 
@@ -150,8 +163,10 @@ PUBLIC winchester_task()
 /*===========================================================================*
  *				w_do_rdwt					     * 
  *===========================================================================*/
-PRIVATE int w_do_rdwt(m_ptr)
-message *m_ptr;			/* pointer to read or write w_message */
+PRIVATE int 
+w_do_rdwt (
+    message *m_ptr			/* pointer to read or write w_message */
+)
 {
 /* Carry out a read or write request from the disk. */
   register struct wini *wn;
@@ -207,8 +222,10 @@ message *m_ptr;			/* pointer to read or write w_message */
 /*===========================================================================*
  *				w_dma_setup				     * 
  *===========================================================================*/
-PRIVATE w_dma_setup(wn)
-struct wini *wn;		/* pointer to the drive struct */
+PRIVATE void
+w_dma_setup (
+    struct wini *wn		/* pointer to the drive struct */
+)
 {
 /* The IBM PC can perform DMA operations by using the DMA chip.  To use it,
  * the DMA (Direct Memory Access) chip is loaded with the 20-bit memory address
@@ -257,8 +274,10 @@ struct wini *wn;		/* pointer to the drive struct */
 /*===========================================================================*
  *				w_transfer				     * 
  *===========================================================================*/
-PRIVATE int w_transfer(wn)
-register struct wini *wn;	/* pointer to the drive struct */
+PRIVATE int 
+w_transfer (
+    register struct wini *wn	/* pointer to the drive struct */
+)
 {
 /* The drive is now on the proper cylinder.  Read or write 1 block. */
 
@@ -290,8 +309,10 @@ register struct wini *wn;	/* pointer to the drive struct */
 /*===========================================================================*
  *				win_results				     * 
  *===========================================================================*/
-PRIVATE int win_results(wn)
-register struct wini *wn;	/* pointer to the drive struct */
+PRIVATE int 
+win_results (
+    register struct wini *wn	/* pointer to the drive struct */
+)
 {
 /* Extract results from the controller after an operation. */
 
@@ -324,8 +345,10 @@ register struct wini *wn;	/* pointer to the drive struct */
 /*===========================================================================*
  *				win_out					     * 
  *===========================================================================*/
-PRIVATE win_out(val)
-int val;			/* write this byte to winchester disk controller */
+PRIVATE void
+win_out (
+    int val			/* write this byte to winchester disk controller */
+)
 {
 /* Output a byte to the controller.  This is not entirely trivial, since you
  * can only write to it when it is listening, and it decides when to listen.
@@ -340,7 +363,8 @@ int val;			/* write this byte to winchester disk controller */
 /*===========================================================================*
  *				w_reset					     * 
  *===========================================================================*/
-PRIVATE w_reset()
+PRIVATE int
+w_reset (void)
 {
 /* Issue a reset to the controller.  This is done after any catastrophe,
  * like the controller refusing to respond.
@@ -368,7 +392,8 @@ PRIVATE w_reset()
 /*===========================================================================*
  *				win_init				     * 
  *===========================================================================*/
-PRIVATE win_init()
+PRIVATE int
+win_init (void)
 {
 /* Routine to initialize the drive parameters after boot or reset */
 
@@ -452,7 +477,7 @@ PRIVATE win_init()
 	if (com_out(INT) != OK)
 		return(ERR);
 	receive(HARDWARE, &w_mess);
-	if (win_results() != OK) {
+	if (win_results(&wini[i * DEV_PER_DRIVE]) != OK) {
 		w_need_reset = TRUE;
 		return(ERR);
 	}
@@ -463,7 +488,8 @@ PRIVATE win_init()
 /*============================================================================*
  *				check_init				      *
  *============================================================================*/
-PRIVATE check_init()
+PRIVATE int
+check_init (void)
 {
 /* Routine to check if controller accepted the parameters */
   int r;
@@ -480,7 +506,8 @@ PRIVATE check_init()
 /*============================================================================*
  *				read_ecc				      *
  *============================================================================*/
-PRIVATE read_ecc()
+PRIVATE int
+read_ecc (void)
 {
 /* Read the ecc burst-length and let the controller correct the data */
 
@@ -501,8 +528,8 @@ PRIVATE read_ecc()
 /*============================================================================*
  *				hd_wait					      *
  *============================================================================*/
-PRIVATE hd_wait(bit)
-register int bit;
+PRIVATE int
+hd_wait (register int bit)
 {
 /* Wait until the controller is ready to receive a command or send status */
 
@@ -524,8 +551,8 @@ register int bit;
 /*============================================================================*
  *				com_out					      *
  *============================================================================*/
-PRIVATE com_out(mode)
-int mode;
+PRIVATE int
+com_out (int mode)
 {
 /* Output the command block to the winchester controller and return status */
 
@@ -558,7 +585,8 @@ int mode;
 /*============================================================================*
  *				init_params				      *
  *============================================================================*/
-PRIVATE init_params()
+PRIVATE void
+init_params (void)
 {
 /* This routine is called at startup to initialize the partition table,
  * the number of drives and the controller
@@ -623,9 +651,8 @@ PRIVATE init_params()
 /*============================================================================*
  *				copy_params				      *
  *============================================================================*/
-PRIVATE copy_params(src, dest)
-register unsigned char *src;
-register struct param *dest;
+PRIVATE void
+copy_params (register unsigned char *src, register struct param *dest)
 {
 /* This routine copies the parameters from src to dest
  * and sets the parameters for partition 0 and 5
@@ -641,8 +668,8 @@ register struct param *dest;
 /*============================================================================*
  *				copy_prt				      *
  *============================================================================*/
-PRIVATE copy_prt(drive)
-int drive;
+PRIVATE void
+copy_prt (int drive)
 {
 /* This routine copies the partition table for the selected drive to
  * the variables wn_low and wn_size
@@ -667,8 +694,8 @@ int drive;
   sort(&wini[drive + 1]);
 }
 
-sort(wn)
-register struct wini *wn;
+void
+sort (register struct wini *wn)
 {
   register int i,j;
 
@@ -680,8 +707,8 @@ register struct wini *wn;
 			swap(&wn[j], &wn[j+1]);
 }
 
-swap(first, second)
-register struct wini *first, *second;
+ void
+swap (register struct wini *first, register struct wini *second)
 {
   register struct wini tmp;
 

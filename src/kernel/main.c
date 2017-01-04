@@ -28,10 +28,13 @@
 #define CPU_TY2       0x000E	/* BIOS offset that tells CPU type */
 #define PC_AT           0xFC	/* IBM code for PC-AT (in BIOS at 0xFFFFE) */
 
+PRIVATE void set_vec (int, int (*)(void), phys_clicks);
+
 /*===========================================================================*
  *                                   main                                    * 
  *===========================================================================*/
-PUBLIC main()
+PUBLIC void
+main (void)
 {
 /* Start the ball rolling. */
 
@@ -44,7 +47,7 @@ PUBLIC main()
   extern int color, vec_table[], get_chrome(), (*task[])();
   extern int s_call(), disk_int(), tty_int(), clock_int(), disk_int();
   extern int wini_int(), lpr_int(), surprise(), trp(), divide();
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   /* Set up proc table entry for user processes.  Be very careful about
    * sp, since the 3 words prior to it will be clobbered when the kernel pushes
@@ -146,7 +149,8 @@ PUBLIC main()
 /*===========================================================================*
  *                                   unexpected_int                          * 
  *===========================================================================*/
-PUBLIC unexpected_int()
+PUBLIC void
+unexpected_int (void)
 {
 /* A trap or interrupt has occurred that was not expected. */
 
@@ -159,7 +163,8 @@ PUBLIC unexpected_int()
 /*===========================================================================*
  *                                   trap                                    * 
  *===========================================================================*/
-PUBLIC trap()
+PUBLIC void
+trap (void)
 {
 /* A trap (vector >= 16) has occurred.  It was not expected. */
 
@@ -174,7 +179,8 @@ PUBLIC trap()
 /*===========================================================================*
  *                                   div_trap                                * 
  *===========================================================================*/
-PUBLIC div_trap()
+PUBLIC void
+div_trap (void)
 {
 /* The divide intruction traps to vector 0 upon overflow. */
 
@@ -187,9 +193,8 @@ PUBLIC div_trap()
 /*===========================================================================*
  *                                   panic                                   * 
  *===========================================================================*/
-PUBLIC panic(s,n)
-char *s;
-int n; 
+PUBLIC void
+panic (char *s, int n) 
 {
 /* The system has run aground of a fatal error.  Terminate execution.
  * If the panic originated in MM or FS, the string will be empty and the
@@ -211,10 +216,12 @@ int n;
 /*===========================================================================*
  *                                   set_vec                                 * 
  *===========================================================================*/
-PRIVATE set_vec(vec_nr, addr, base_click)
-int vec_nr;			/* which vector */
-int (*addr)();			/* where to start */
-phys_clicks base_click;		/* click where kernel sits in memory */
+PRIVATE void
+set_vec (
+    int vec_nr,			/* which vector */
+    int (*addr)(void),			/* where to start */
+    phys_clicks base_click		/* click where kernel sits in memory */
+)
 {
 /* Set up an interrupt vector. */
 

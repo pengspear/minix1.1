@@ -195,11 +195,36 @@ PRIVATE char m24[] = {
  0233,0234,0235,0236,0237,0275,0276,0277
 };
 
+PRIVATE void do_charint(message *);
+PRIVATE void in_char(int, char);
+PRIVATE char make_break(char);
+PRIVATE void echo(register struct tty_struct *, register char);
+PRIVATE int chuck(register struct tty_struct *);
+PRIVATE void do_read(register struct tty_struct *, message *);
+PRIVATE int rd_chars(register struct tty_struct *);
+PRIVATE void finish(register struct tty_struct *, int);
+PRIVATE void do_write(register struct tty_struct *, message *);
+PRIVATE void do_ioctl(register struct tty_struct *, message *);
+PRIVATE void do_cancel(register struct tty_struct *, message *);
+PRIVATE void tty_reply(int, int, int, int, long, long);
+PRIVATE void console(register struct tty_struct *);
+PRIVATE void out_char(register struct tty_struct *, char);
+PRIVATE void scroll_screen(register struct tty_struct *, int);
+PRIVATE void flush(register struct tty_struct *);
+PRIVATE void move_to(struct tty_struct *, int, int);
+PRIVATE void escape(register struct tty_struct *, char, char);
+PRIVATE void set_6845(int, int);
+PRIVATE void beep(int);
+PRIVATE void tty_init(void);
+PRIVATE void func_key(char);
+PUBLIC int do_mem(register message *);
+PUBLIC int do_setup(message *);
 
 /*===========================================================================*
  *				tty_task				     *
  *===========================================================================*/
-PUBLIC tty_task()
+PUBLIC void
+tty_task (void)
 {
 /* Main routine of the terminal task. */
 
@@ -227,8 +252,10 @@ PUBLIC tty_task()
 /*===========================================================================*
  *				do_charint				     *
  *===========================================================================*/
-PRIVATE do_charint(m_ptr)
-message *m_ptr;			/* message containing pointer to char(s) */
+PRIVATE void
+do_charint (
+    message *m_ptr			/* message containing pointer to char(s) */
+)
 {
 /* A character has been typed.  If a character is typed and the tty task is
  * not able to service it immediately, the character is accumulated within
@@ -280,15 +307,17 @@ message *m_ptr;			/* message containing pointer to char(s) */
 /*===========================================================================*
  *				in_char					     *
  *===========================================================================*/
-PRIVATE in_char(line, ch)
-int line;			/* line number on which char arrived */
-char ch;			/* scan code for character that arrived */
+PRIVATE void
+in_char (
+    int line,			/* line number on which char arrived */
+    char ch			/* scan code for character that arrived */
+)
 {
 /* A character has just been typed in.  Process, save, and echo it. */
 
   register struct tty_struct *tp;
   int mode, sig;
-  char make_break();
+  char make_break(char);
   tp = &tty_struct[line];	/* set 'tp' to point to proper struct */
   /* Function keys are temporarily being used for debug dumps. */
   if (ch >= F1 && ch <= F10) {	/* Check for function keys F1, F2, ... F10 */
@@ -397,8 +426,10 @@ char ch;			/* scan code for character that arrived */
 /*===========================================================================*
  *				make_break				     *
  *===========================================================================*/
-PRIVATE char make_break(ch)
-char ch;			/* scan code of key just struck or released */
+PRIVATE char 
+make_break (
+    char ch			/* scan code of key just struck or released */
+)
 {
 /* This routine can handle keyboards that interrupt only on key depression,
  * as well as keyboards that interrupt on key depression and key release.
@@ -448,9 +479,11 @@ char ch;			/* scan code of key just struck or released */
 /*===========================================================================*
  *				echo					     *
  *===========================================================================*/
-PRIVATE echo(tp, c)
-register struct tty_struct *tp;	/* terminal on which to echo */
-register char c;		/* character to echo */
+PRIVATE void
+echo (
+    register struct tty_struct *tp,	/* terminal on which to echo */
+    register char c		/* character to echo */
+)
 {
 /* Echo a character on the terminal. */
 
@@ -463,8 +496,10 @@ register char c;		/* character to echo */
 /*===========================================================================*
  *				chuck					     *
  *===========================================================================*/
-PRIVATE int chuck(tp)
-register struct tty_struct *tp;	/* from which tty should chars be removed */
+PRIVATE int 
+chuck (
+    register struct tty_struct *tp	/* from which tty should chars be removed */
+)
 {
 /* Delete one character from the input queue.  Used for erase and kill. */
 
@@ -486,9 +521,11 @@ register struct tty_struct *tp;	/* from which tty should chars be removed */
 /*===========================================================================*
  *				do_read					     *
  *===========================================================================*/
-PRIVATE do_read(tp, m_ptr)
-register struct tty_struct *tp;	/* pointer to tty struct */
-message *m_ptr;			/* pointer to message sent to the task */
+PRIVATE void
+do_read (
+    register struct tty_struct *tp,	/* pointer to tty struct */
+    message *m_ptr			/* pointer to message sent to the task */
+)
 {
 /* A process wants to read from a terminal. */
 
@@ -515,8 +552,10 @@ message *m_ptr;			/* pointer to message sent to the task */
 /*===========================================================================*
  *				rd_chars				     *
  *===========================================================================*/
-PRIVATE int rd_chars(tp)
-register struct tty_struct *tp;	/* pointer to terminal to read from */
+PRIVATE int 
+rd_chars (
+    register struct tty_struct *tp	/* pointer to terminal to read from */
+)
 {
 /* A process wants to read from a terminal.  First check if enough data is
  * available. If so, pass it to the user.  If not, send FS a message telling
@@ -529,7 +568,7 @@ register struct tty_struct *tp;	/* pointer to terminal to read from */
   phys_bytes user_phys, tty_phys;
   char ch, *tty_ptr;
   struct proc *rp;
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   cooked = ( (tp->tty_mode & (RAW | CBREAK)) ? 0 : 1);	/* 1 iff COOKED mode */
   if (tp->tty_incount == 0 || (cooked && tp->tty_lfct == 0)) return(SUSPEND);
@@ -586,9 +625,11 @@ register struct tty_struct *tp;	/* pointer to terminal to read from */
 /*===========================================================================*
  *				finish					     *
  *===========================================================================*/
-PRIVATE finish(tp, code)
-register struct tty_struct *tp;	/* pointer to tty struct */
-int code;			/* reply code */
+PRIVATE void
+finish (
+    register struct tty_struct *tp,	/* pointer to tty struct */
+    int code			/* reply code */
+)
 {
 /* A command has terminated (possibly due to DEL).  Tell caller. */
 
@@ -607,15 +648,17 @@ int code;			/* reply code */
 /*===========================================================================*
  *				do_write				     *
  *===========================================================================*/
-PRIVATE do_write(tp, m_ptr)
-register struct tty_struct *tp;	/* pointer to tty struct */
-message *m_ptr;			/* pointer to message sent to the task */
+PRIVATE void
+do_write (
+    register struct tty_struct *tp,	/* pointer to tty struct */
+    message *m_ptr			/* pointer to message sent to the task */
+)
 {
 /* A process wants to write on a terminal. */
 
   vir_bytes out_vir, out_left;
   struct proc *rp;
-  extern phys_bytes umap();
+  extern phys_bytes umap(register struct proc *, int, vir_bytes, vir_bytes);
 
   /* Copy message parameters to the tty structure. */
   tp->tty_otcaller = m_ptr->m_source;
@@ -643,9 +686,11 @@ message *m_ptr;			/* pointer to message sent to the task */
 /*===========================================================================*
  *				do_ioctl				     *
  *===========================================================================*/
-PRIVATE do_ioctl(tp, m_ptr)
-register struct tty_struct *tp;	/* pointer to tty_struct */
-message *m_ptr;			/* pointer to message sent to task */
+PRIVATE void
+do_ioctl (
+    register struct tty_struct *tp,	/* pointer to tty_struct */
+    message *m_ptr			/* pointer to message sent to task */
+)
 {
 /* Perform IOCTL on this terminal. */
 
@@ -703,9 +748,11 @@ message *m_ptr;			/* pointer to message sent to task */
 /*===========================================================================*
  *				do_cancel				     *
  *===========================================================================*/
-PRIVATE do_cancel(tp, m_ptr)
-register struct tty_struct *tp;	/* pointer to tty_struct */
-message *m_ptr;			/* pointer to message sent to task */
+PRIVATE void
+do_cancel (
+    register struct tty_struct *tp,	/* pointer to tty_struct */
+    message *m_ptr			/* pointer to message sent to task */
+)
 {
 /* A signal has been sent to a process that is hanging trying to read or write.
  * The pending read or write must be finished off immediately.
@@ -732,13 +779,15 @@ message *m_ptr;			/* pointer to message sent to task */
 /*===========================================================================*
  *				tty_reply				     *
  *===========================================================================*/
-PRIVATE tty_reply(code, replyee, proc_nr, status, extra, other)
-int code;			/* TASK_REPLY or REVIVE */
-int replyee;			/* destination address for the reply */
-int proc_nr;			/* to whom should the reply go? */
-int status;			/* reply code */
-long extra;			/* extra value */
-long other;			/* used for IOCTL replies */
+PRIVATE void
+tty_reply (
+    int code,			/* TASK_REPLY or REVIVE */
+    int replyee,			/* destination address for the reply */
+    int proc_nr,			/* to whom should the reply go? */
+    int status,			/* reply code */
+    long extra,			/* extra value */
+    long other			/* used for IOCTL replies */
+)
 {
 /* Send a reply to a process that wanted to read or write data. */
 
@@ -815,7 +864,8 @@ PRIVATE int vid_port;		/* I/O port for accessing 6845 */
 /*===========================================================================*
  *				keyboard				     *
  *===========================================================================*/
-PUBLIC keyboard()
+PUBLIC void
+keyboard (void)
 {
 /* A keyboard interrupt has occurred.  Process it. */
 
@@ -880,8 +930,10 @@ PUBLIC keyboard()
 /*===========================================================================*
  *				console					     *
  *===========================================================================*/
-PRIVATE console(tp)
-register struct tty_struct *tp;	/* tells which terminal is to be used */
+PRIVATE void
+console (
+    register struct tty_struct *tp	/* tells which terminal is to be used */
+)
 {
 /* Copy as much data as possible to the output queue, then start I/O.  On
  * memory-mapped terminals, such as the IBM console, the I/O will also be
@@ -919,9 +971,11 @@ register struct tty_struct *tp;	/* tells which terminal is to be used */
 /*===========================================================================*
  *				out_char				     *
  *===========================================================================*/
-PRIVATE out_char(tp, c)
-register struct tty_struct *tp;	/* pointer to tty struct */
-char c;				/* character to be output */
+PRIVATE void
+out_char (
+    register struct tty_struct *tp,	/* pointer to tty struct */
+    char c				/* character to be output */
+)
 {
 /* Output a character on the console. Check for escape sequences, including
  *   ESC 32+x 32+y to move cursor to (x, y)
@@ -1006,9 +1060,11 @@ char c;				/* character to be output */
 /*===========================================================================*
  *				scroll_screen				     *
  *===========================================================================*/
-PRIVATE scroll_screen(tp, dir)
-register struct tty_struct *tp;	/* pointer to tty struct */
-int dir;			/* GO_FORWARD or GO_BACKWARD */
+PRIVATE void
+scroll_screen (
+    register struct tty_struct *tp,	/* pointer to tty struct */
+    int dir			/* GO_FORWARD or GO_BACKWARD */
+)
 {
   int amount, offset;
 
@@ -1028,8 +1084,10 @@ int dir;			/* GO_FORWARD or GO_BACKWARD */
 /*===========================================================================*
  *				flush					     *
  *===========================================================================*/
-PRIVATE flush(tp)
-register struct tty_struct *tp;	/* pointer to tty struct */
+PRIVATE void
+flush (
+    register struct tty_struct *tp	/* pointer to tty struct */
+)
 {
 /* Have the characters in 'ramqueue' transferred to the screen. */
 
@@ -1046,10 +1104,12 @@ register struct tty_struct *tp;	/* pointer to tty struct */
 /*===========================================================================*
  *				move_to					     *
  *===========================================================================*/
-PRIVATE move_to(tp, x, y)
-struct tty_struct *tp;		/* pointer to tty struct */
-int x;				/* column (0 <= x <= 79) */
-int y;				/* row (0 <= y <= 24, 0 at bottom) */
+PRIVATE void
+move_to (
+    struct tty_struct *tp,		/* pointer to tty struct */
+    int x,				/* column (0 <= x <= 79) */
+    int y				/* row (0 <= y <= 24, 0 at bottom) */
+)
 {
 /* Move the cursor to (x, y). */
 
@@ -1065,10 +1125,12 @@ int y;				/* row (0 <= y <= 24, 0 at bottom) */
 /*===========================================================================*
  *				escape					     *
  *===========================================================================*/
-PRIVATE escape(tp, x, y)
-register struct tty_struct *tp;	/* pointer to tty struct */
-char x;				/* escape sequence is ESC x y; this is x */
-char y;				/* escape sequence is ESC x y; this is y */
+PRIVATE void
+escape (
+    register struct tty_struct *tp,	/* pointer to tty struct */
+    char x,				/* escape sequence is ESC x y; this is x */
+    char y				/* escape sequence is ESC x y; this is y */
+)
 {
 /* Handle an escape sequence. */
 
@@ -1108,9 +1170,11 @@ char y;				/* escape sequence is ESC x y; this is y */
 /*===========================================================================*
  *				set_6845				     *
  *===========================================================================*/
-PRIVATE set_6845(reg, val)
-int reg;			/* which register pair to set */
-int val;			/* 16-bit value to set it to */
+PRIVATE void
+set_6845 (
+    int reg,			/* which register pair to set */
+    int val			/* 16-bit value to set it to */
+)
 {
 /* Set a register pair inside the 6845.  
  * Registers 10-11 control the format of the cursor (how high it is, etc).
@@ -1132,8 +1196,10 @@ int val;			/* 16-bit value to set it to */
 /*===========================================================================*
  *				beep					     *
  *===========================================================================*/
-PRIVATE beep(f)
-int f;				/* this value determines beep frequency */
+PRIVATE void
+beep (
+    int f				/* this value determines beep frequency */
+)
 {
 /* Making a beeping sound on the speaker (output for CRTL-G).  The beep is
  * kept short, because interrupts must be disabled during beeping, and it
@@ -1158,7 +1224,8 @@ int f;				/* this value determines beep frequency */
 /*===========================================================================*
  *				tty_init				     *
  *===========================================================================*/
-PRIVATE tty_init()
+PRIVATE void
+tty_init (void)
 {
 /* Initialize the tty tables. */
 
@@ -1209,8 +1276,10 @@ PRIVATE tty_init()
 /*===========================================================================*
  *				putc					     *
  *===========================================================================*/
-PUBLIC putc(c)
-char c;				/* character to print */
+PUBLIC void
+putc (
+    char c				/* character to print */
+)
 {
 /* This procedure is used by the version of printf() that is linked with
  * the kernel itself.  The one in the library sends a message to FS, which is
@@ -1225,8 +1294,10 @@ char c;				/* character to print */
 /*===========================================================================*
  *				func_key				     *
  *===========================================================================*/
-PRIVATE func_key(ch)
-char ch;			/* scan code for a function key */
+PRIVATE void
+func_key (
+    char ch			/* scan code for a function key */
+)
 {
 /* This procedure traps function keys for debugging purposes.  When MINIX is
  * fully debugged, it should be removed.
